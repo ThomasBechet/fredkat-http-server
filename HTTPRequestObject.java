@@ -1,7 +1,14 @@
 import java.util.*;
 import java.io.*;
 
+/**
+ * Class responsible for building the HTTP Client request
+ */
 public class HTTPRequestObject {
+
+    /**
+     * Available http request type
+     */
     public static enum Type {
         GET,
         POST,
@@ -12,18 +19,20 @@ public class HTTPRequestObject {
         UNDEFINED
     }
 
-    private Type type;
-    private String queryString;
-    private String version;
-    private Map<String, String> headers;
+    private Type type; // Request type
+    private String queryString; // Request query string
+    private String version; // Request version
+    private Map<String, String> headers; // Request headers
 
     public HTTPRequestObject(BufferedReader reader) throws IOException {
         this.headers = new HashMap<String, String>();
         
         String line;
         
-        // Request
+        // Split first line tokens
         String[] requestTokens = reader.readLine().split(" ");
+        
+        // Read the request type
         String type = requestTokens[0].trim();
         if (type.equals("GET")) {
             this.type = Type.GET;
@@ -32,10 +41,12 @@ public class HTTPRequestObject {
         } else {
             this.type = Type.UNDEFINED;
         }
+        // Read the query string
         this.queryString = requestTokens[1].trim();
+        // Read the request version
         this.version = requestTokens[2].trim();
 
-        // Headers
+        // Read headers (put in the map)
         List<String> headers = new ArrayList<String>();
         while ((line = reader.readLine()).length() > 0) {
             String[] tokens = line.trim().split(":");

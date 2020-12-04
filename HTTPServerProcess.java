@@ -4,7 +4,11 @@ import java.nio.file.*;
 import java.util.*;
 import java.util.stream.*;
 
+/**
+ * One server process is created per client request
+ */
 public class HTTPServerProcess implements Runnable {
+    // Client/Server socket
     private Socket socket;
 
     // Error html files URI (same uri for both servers)
@@ -18,6 +22,12 @@ public class HTTPServerProcess implements Runnable {
         "kristine.localhost", "kristineServer"
     );
 
+    /**
+     * Build the Uniform Resource Identifier from the query string
+     * Decode strange characters from the URL
+     * Remove parameters from URL
+     * Redirect on index.html if identifier is a directory
+     */
     private static String buildURI(String query) throws UnsupportedEncodingException {
         // Decode query
         String decodedQuery = URLDecoder.decode(query, "UTF-8"); // Decide %xx characters
@@ -32,6 +42,9 @@ public class HTTPServerProcess implements Runnable {
         }
     }
 
+    /**
+     * Build the server local directory from the previously build URI and the server name
+     */
     private static String buildPath(String uri, String host) {
         // Get the current directory
         Path currentRelativePath = Paths.get("");
@@ -44,6 +57,9 @@ public class HTTPServerProcess implements Runnable {
         return currentPath + "/" + root + "/" + uri;
     }
     
+    /**
+     * Constructor
+     */
     public HTTPServerProcess(Socket socket) {
         this.socket = socket;
     }
@@ -51,6 +67,9 @@ public class HTTPServerProcess implements Runnable {
     @Override
     public void run() {
         try {
+            /**
+             * Recover streams from the socket
+             */
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
         
@@ -68,6 +87,7 @@ public class HTTPServerProcess implements Runnable {
             String uri = buildURI(request.getQueryString());
             String path = buildPath(uri, host);
 
+            // Debug info
             System.out.println(host + " : " + path);
 
             // Check request method (only GET supported)
